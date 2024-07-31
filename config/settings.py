@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from  dotenv import load_dotenv
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -21,6 +21,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "corsheaders",
     "drf_yasg",
+    "rest_framework",
+    "users",
 ]
 
 MIDDLEWARE = [
@@ -100,3 +102,10 @@ CORS_ALLOWED_ORIGINS = [
 CSRF_TRUSTED_ORIGINS = [
     "https://read-and-write.example.com",
 ]
+
+AUTH_USER_MODEL = 'users.User'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
