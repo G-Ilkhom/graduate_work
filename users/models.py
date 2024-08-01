@@ -12,7 +12,6 @@ class User(AbstractUser):
         (USER, 'User'),
         (ADMIN, 'Admin'),
     ]
-
     username = None
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=50, null=True, blank=True)
@@ -20,9 +19,10 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     role = models.CharField(choices=ROLE_CHOICES, default=USER)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
+    token = models.CharField(max_length=100, verbose_name="Token", blank=True, null=True)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['first_name']
 
     class Meta:
         verbose_name = 'Пользователь'
