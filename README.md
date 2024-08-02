@@ -46,7 +46,7 @@ source venv/bin/activate
 ```
 ### 4. Установите зависимости с помощью Poetry:
 ```sh
-poetry install
+pip install
 ```
 ### 5. Выполните команду
 ```sh
