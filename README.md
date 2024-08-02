@@ -44,9 +44,9 @@ venv\Scripts\activate
 ```sh
 source venv/bin/activate
 ```
-### 4. Установите зависимости с помощью Poetry:
+### 4. Установите зависимости:
 ```sh
-pip install
+pip install -r requirements.txt
 ```
 ### 5. Выполните команду
 ```sh
