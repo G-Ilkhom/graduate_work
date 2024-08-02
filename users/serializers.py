@@ -1,17 +1,19 @@
 import logging
 import secrets
+
 from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from rest_framework import serializers
-from users.models import User
 from django.utils.encoding import force_bytes, force_str
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from rest_framework import serializers
+
+from users.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """ Сериализатор для модели User """
+    """Сериализатор для модели User"""
 
     class Meta:
         model = User
@@ -19,7 +21,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
-    """ Сериализатор для регистрации пользователя """
+    """Сериализатор для регистрации пользователя"""
 
     password = serializers.CharField(write_only=True)
     password2 = serializers.CharField(write_only=True)
@@ -39,25 +41,23 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Пароли не совпадают")
 
         user = User(
-            email=validated_data["email"],
-            first_name=first_name,
-            is_active=False
+            email=validated_data["email"], first_name=first_name, is_active=False
         )
 
         user.set_password(password)
         token = secrets.token_urlsafe(16)
         user.token = token
         user.save()
-        request = self.context.get('request')
-        host = request.META.get('HTTP_HOST') if request else 'error'
-        url = f'http://{host}/users/email_confirm/{token}/'
+        request = self.context.get("request")
+        host = request.META.get("HTTP_HOST") if request else "error"
+        url = f"http://{host}/users/email_confirm/{token}/"
 
         try:
             send_mail(
-                subject='Подтверждение почты',
-                message=f'Ссылка для подтверждения почты: {url}',
+                subject="Подтверждение почты",
+                message=f"Ссылка для подтверждения почты: {url}",
                 from_email=settings.EMAIL_HOST_USER,
-                recipient_list=[user.email]
+                recipient_list=[user.email],
             )
             logging.info(f"Письмо отправлено на почту {user.email}")
         except Exception as e:
@@ -67,7 +67,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
 
 class UserPasswordResetSerializer(serializers.Serializer):
-    """ Сериализатор для сброса пароля """
+    """Сериализатор для сброса пароля"""
 
     email = serializers.EmailField()
 
@@ -76,18 +76,18 @@ class UserPasswordResetSerializer(serializers.Serializer):
         user = User.objects.get(email=email)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
-        host = 'http://127.0.0.1:8000'
+        host = "http://127.0.0.1:8000"
         url = f"http://{host}/users/reset_password/{uid}/{token}/"
         send_mail(
-            subject='Сброс пароля',
-            message=f'Ссылка для сброса вашего пароля: {url}',
+            subject="Сброс пароля",
+            message=f"Ссылка для сброса вашего пароля: {url}",
             from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[user.email]
+            recipient_list=[user.email],
         )
 
 
 class UserPasswordResetConfirmSerializer(serializers.Serializer):
-    """ Сериализатор для подтверждения сброса пароля """
+    """Сериализатор для подтверждения сброса пароля"""
 
     uid = serializers.CharField()
     token = serializers.CharField()
@@ -121,22 +121,25 @@ class UserPasswordResetConfirmSerializer(serializers.Serializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    """ Сериализатор для входа пользователя """
+    """Сериализатор для входа пользователя"""
 
     email = serializers.EmailField()
     password = serializers.CharField()
 
     def validate(self, data):
-        email = data.get('email')
-        password = data.get('password')
+        email = data.get("email")
+        password = data.get("password")
 
         if email and password:
-            user = authenticate(request=self.context.get('request'),
-                                email=email, password=password)
+            user = authenticate(
+                request=self.context.get("request"), email=email, password=password
+            )
             if not user:
-                raise serializers.ValidationError('Неверные учетные данные')
+                raise serializers.ValidationError("Неверные учетные данные")
         else:
-            raise serializers.ValidationError('Необходимо ввести адрес электронной почты и пароль')
+            raise serializers.ValidationError(
+                "Необходимо ввести адрес электронной почты и пароль"
+            )
 
-        data['user'] = user
+        data["user"] = user
         return data

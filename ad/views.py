@@ -7,12 +7,13 @@ from rest_framework.response import Response
 
 from ad.models import Ad, Review
 from ad.paginations import AdsPaginator
-from ad.permissions import IsOwner, IsAdminUser
-from ad.serializers import AdSerializer, ReviewSerializer, ReviewCreateSerializer
+from ad.permissions import IsAdminUser, IsOwner
+from ad.serializers import (AdSerializer, ReviewCreateSerializer,
+                            ReviewSerializer)
 
 
 class AdsCreateAPIView(generics.CreateAPIView):
-    """ Создание объявления """
+    """Создание объявления"""
 
     serializer_class = AdSerializer
     permission_classes = [IsAuthenticated]
@@ -22,7 +23,7 @@ class AdsCreateAPIView(generics.CreateAPIView):
 
 
 class AdsRetrieveAPIView(generics.RetrieveAPIView):
-    """ Просмотр информации об одном объявлении """
+    """Просмотр информации об одном объявлении"""
 
     queryset = Ad.objects.all()
     serializer_class = AdSerializer
@@ -30,7 +31,7 @@ class AdsRetrieveAPIView(generics.RetrieveAPIView):
 
 
 class AdsUpdateAPIView(generics.UpdateAPIView):
-    """ Редактирование объявления """
+    """Редактирование объявления"""
 
     serializer_class = AdSerializer
     queryset = Ad.objects.all()
@@ -42,7 +43,7 @@ class AdsUpdateAPIView(generics.UpdateAPIView):
 
 
 class AdsDestroyAPIView(generics.DestroyAPIView):
-    """ Удаление объявления """
+    """Удаление объявления"""
 
     queryset = Ad.objects.all()
     permission_classes = [IsOwner, IsAdminUser]
@@ -52,47 +53,50 @@ class AdsDestroyAPIView(generics.DestroyAPIView):
 
 
 class AdsListAPIView(generics.ListAPIView):
-    """ Вывод списка всех объявлений """
+    """Вывод списка всех объявлений"""
 
     serializer_class = AdSerializer
     pagination_class = AdsPaginator
     queryset = Ad.objects.all()
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    filterset_fields = ['title']
-    search_fields = ['title']
+    filterset_fields = ["title"]
+    search_fields = ["title"]
     permission_classes = [AllowAny]
 
 
 class ReviewCreateAPIView(generics.CreateAPIView):
-    """ Создание отзыва """
+    """Создание отзыва"""
 
     queryset = Review.objects.all()
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
-        if self.request.method == 'POST':
+        if self.request.method == "POST":
             return ReviewCreateSerializer
         return ReviewSerializer
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user, ad_id=self.kwargs['ad_id'])
+        serializer.save(author=self.request.user, ad_id=self.kwargs["ad_id"])
 
 
 class ReviewUpdateAPIView(generics.UpdateAPIView):
-    """ Редактирование отзыва """
+    """Редактирование отзыва"""
 
     serializer_class = ReviewSerializer
     queryset = Review.objects.all()
     permission_classes = [IsOwner, IsAdminUser]
 
     def put(self, request, *args, **kwargs):
-        ad_id = self.kwargs['ad_id']
-        review_id = self.kwargs['pk']
+        ad_id = self.kwargs["ad_id"]
+        review_id = self.kwargs["pk"]
 
         review = get_object_or_404(Review, pk=review_id)
 
         if review.ad.id != ad_id:
-            return Response("Невозможно обновить отзыв из-за некорректного запроса", status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                "Невозможно обновить отзыв из-за некорректного запроса",
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         serializer = self.get_serializer(review, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -102,26 +106,29 @@ class ReviewUpdateAPIView(generics.UpdateAPIView):
 
 
 class ReviewDestroyAPIView(generics.DestroyAPIView):
-    """ Удаление отзыва """
+    """Удаление отзыва"""
 
     queryset = Review.objects.all()
     permission_classes = [IsOwner, IsAdminUser]
 
     def delete(self, request, *args, **kwargs):
-        ad_id = self.kwargs['ad_id']
-        review_id = self.kwargs['pk']
+        ad_id = self.kwargs["ad_id"]
+        review_id = self.kwargs["pk"]
 
         review = get_object_or_404(Review, pk=review_id)
 
         if review.ad.id != ad_id:
-            return Response("Невозможно удалить отзыв из-за некорректного запроса", status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                "Невозможно удалить отзыв из-за некорректного запроса",
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         self.perform_destroy(review)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ReviewListAPIView(generics.ListAPIView):
-    """ Вывод списка всех отзывов """
+    """Вывод списка всех отзывов"""
 
     serializer_class = ReviewSerializer
     queryset = Review.objects.all()

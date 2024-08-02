@@ -11,9 +11,9 @@ class Ad(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Объявление'
-        verbose_name_plural = 'Объявления'
-        ordering = ['-created_at']
+        verbose_name = "Объявление"
+        verbose_name_plural = "Объявления"
+        ordering = ["-created_at"]
 
 
 class Review(models.Model):
@@ -23,5 +23,5 @@ class Review(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Отзыв'
-        verbose_name_plural = 'Отзывы'
+        verbose_name = "Отзыв"
+        verbose_name_plural = "Отзывы"
